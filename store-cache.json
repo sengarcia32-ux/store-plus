@@ -12,5 +12,19 @@
       "NSSpeechRecognitionUsageDescription": "Note+ transcribes your recordings into text so it can create notes, flashcards, and quizzes."
     },
     "version": "1.1.7"
+  },
+  "701693729": {
+    "buildVersion": "8",
+    "bundleIdentifier": "com.sengarcia.noteplus",
+    "entitlements": [],
+    "icon": "icons/701693729.png",
+    "minOSVersion": "26.0",
+    "name": "Note+",
+    "privacy": {
+      "NSCameraUsageDescription": "Note+ uses the camera to scan documents and handwritten pages into notes.",
+      "NSMicrophoneUsageDescription": "Note+ records lectures and voice notes so it can transcribe them into study notes.",
+      "NSSpeechRecognitionUsageDescription": "Note+ transcribes your recordings into text so it can create notes, flashcards, and quizzes."
+    },
+    "version": "1.1.8"
   }
 }
