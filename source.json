@@ -17,11 +17,20 @@
       "developerName": "sengarcia32",
       "subtitle": "AI notes, flashcards, quizzes and Ask AI",
       "localizedDescription": "Turn documents, recordings, YouTube videos and handwriting into study notes, flashcards and quizzes, and ask questions about any document.",
-      "iconURL": "https://raw.githubusercontent.com/sengarcia32-ux/store-plus/main/icons/701693729.png",
+      "iconURL": "https://raw.githubusercontent.com/sengarcia32-ux/store-plus/main/icons/701795776.png",
       "tintColor": "4F46E5",
       "category": "utilities",
       "screenshots": [],
       "versions": [
+        {
+          "version": "1.1.9",
+          "buildVersion": "9",
+          "date": "2026-11-02T13:07:29Z",
+          "localizedDescription": "Point Note+ at the renamed Store Plus repo",
+          "downloadURL": "https://github.com/sengarcia32-ux/store-plus/releases/download/com.sengarcia.noteplus-1.1.9-9/NotePlus-1.1.9.ipa",
+          "size": 944404,
+          "minOSVersion": "26.0"
+        },
         {
           "version": "1.1.8",
           "buildVersion": "8",
