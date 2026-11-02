@@ -137,6 +137,16 @@
     .version-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
     .version p { color: var(--muted); font-size: 14px; margin-top: 4px; }
 
+    .install { z-index: 15; }
+    .sheet-panel.small { max-width: 460px; }
+    .sheet-panel h2 { font-size: 22px; margin: 4px 40px 8px 0; }
+    .lead { margin: 0 0 12px; color: var(--muted); }
+    .choice { display: grid; gap: 6px; padding: 14px; margin-top: 10px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+    .choice span { color: var(--muted); font-size: 14px; }
+    .choice .btn { margin-top: 4px; }
+    .status { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(245, 158, 11, 0.14); color: inherit; font-size: 14px; }
+    .btn.plain { background: none; width: 100%; margin-top: 8px; }
+
     #toast {
       position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 20;
       transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
@@ -154,7 +164,7 @@
       <h1 id="store-name">Store Plus</h1>
       <p id="store-subtitle">Apps for your iPhone and iPad.</p>
       <div class="actions">
-        <a class="btn primary" id="add-source">Add to SideStore</a>
+        <button class="btn primary" type="button" id="add-source">Add to SideStore</button>
         <button class="btn" type="button" id="copy-source">Copy Store Link</button>
       </div>
       <span class="badge">Free · Installed with your own Apple ID</span>
@@ -165,15 +175,15 @@
       <p class="empty">Loading apps…</p>
     </div>
 
-    <h2 class="section-title">How to install</h2>
+    <h2 class="section-title" id="how">How to install</h2>
     <section class="card how">
       <ol>
         <li><strong>Set up SideStore once.</strong> It needs a computer for the first install
           (<a href="https://docs.sidestore.io/docs/installation/prerequisites" target="_blank" rel="noopener">SideStore guide</a>).</li>
         <li><strong>Install LocalDevVPN</strong> from the App Store and tap <em>Connect</em>.
           SideStore needs it on while installing or updating.</li>
-        <li><strong>Tap “Add to SideStore”</strong> above. Or copy the store link and add it in
-          SideStore › <em>Sources</em> › <em>+</em>.</li>
+        <li><strong>Tap “Add to SideStore”</strong> above, then <em>Open SideStore</em>. Or copy the store
+          link and add it in SideStore › <em>Sources</em> › <em>+</em>.</li>
         <li>Open <strong>Store Plus</strong> in SideStore and tap an app's <strong>FREE</strong> button.
           New versions show up as <em>Update</em> in My Apps.</li>
       </ol>
@@ -194,6 +204,28 @@
     <article class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
       <button class="close" type="button" data-close aria-label="Close">✕</button>
       <div id="sheet-body"></div>
+    </article>
+  </div>
+
+  <div class="sheet install" id="install" hidden>
+    <div class="sheet-backdrop" data-close-install></div>
+    <article class="sheet-panel small" role="dialog" aria-modal="true" aria-labelledby="install-title">
+      <button class="close" type="button" data-close-install aria-label="Close">✕</button>
+      <h2 id="install-title">Install with SideStore</h2>
+      <p class="lead">iPhone and iPad can't install apps straight from a website. Apps in Store Plus install
+        through <strong>SideStore</strong>, a free app that signs them with your own Apple ID.</p>
+      <div class="choice">
+        <strong>Already have SideStore?</strong>
+        <span>Connect LocalDevVPN first, then open the store in SideStore.</span>
+        <button class="btn primary" type="button" id="open-sidestore">Open SideStore</button>
+      </div>
+      <div class="choice">
+        <strong>No SideStore yet?</strong>
+        <span>Set it up once. It takes about 15 minutes and a computer.</span>
+        <a class="btn" href="#how" id="show-how">How to set it up</a>
+      </div>
+      <p class="status" id="install-status" hidden></p>
+      <button class="btn plain" type="button" id="copy-in-dialog">Copy Store Link</button>
     </article>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
@@ -326,7 +358,7 @@
             el("h2", { id: "sheet-title", text: app.name }),
             el("p", { text: app.subtitle || app.developerName || "" }),
             el("div", { class: "actions" },
-              el("a", { class: "btn primary small", href: SIDESTORE_LINK }, "Get in SideStore"),
+              el("button", { class: "btn primary small", type: "button", onclick: openInstall }, "Get in SideStore"),
               download && el("a", { class: "btn small", href: download, download: "" }, "Download IPA")
             )
           )
@@ -375,15 +407,51 @@
       );
     }
 
+    const install = document.getElementById("install");
+    const installStatus = document.getElementById("install-status");
+
+    function updateLock() {
+      document.documentElement.classList.toggle("locked", !sheet.hidden || !install.hidden);
+    }
+
     function openSheet() {
       sheet.hidden = false;
-      document.documentElement.classList.add("locked");
+      updateLock();
       sheet.querySelector(".close").focus({ preventScroll: true });
     }
 
     function closeSheet() {
       sheet.hidden = true;
-      document.documentElement.classList.remove("locked");
+      updateLock();
+    }
+
+    function openInstall() {
+      installStatus.hidden = true;
+      install.hidden = false;
+      updateLock();
+      document.getElementById("open-sidestore").focus({ preventScroll: true });
+    }
+
+    function closeInstall() {
+      install.hidden = true;
+      updateLock();
+    }
+
+    // iOS can't tell a web page whether an app is installed. If the page is still
+    // showing a moment after asking for SideStore, it didn't open.
+    function tryOpenSideStore() {
+      installStatus.hidden = true;
+      let left = false;
+      const onHide = () => { if (document.hidden) left = true; };
+      document.addEventListener("visibilitychange", onHide);
+      window.location.href = SIDESTORE_LINK;
+      setTimeout(() => {
+        document.removeEventListener("visibilitychange", onHide);
+        if (!left) {
+          installStatus.textContent = "SideStore didn't open, so it isn't installed on this device yet. Tap “How to set it up” first.";
+          installStatus.hidden = false;
+        }
+      }, 2000);
     }
 
     function route() {
@@ -418,10 +486,18 @@
       }
     }
 
-    document.getElementById("add-source").href = SIDESTORE_LINK;
+    document.getElementById("add-source").addEventListener("click", openInstall);
     document.getElementById("copy-source").addEventListener("click", copySourceLink);
+    document.getElementById("copy-in-dialog").addEventListener("click", copySourceLink);
+    document.getElementById("open-sidestore").addEventListener("click", tryOpenSideStore);
+    document.getElementById("show-how").addEventListener("click", closeInstall);
+    install.addEventListener("click", event => { if (event.target.closest("[data-close-install]")) closeInstall(); });
     sheet.addEventListener("click", event => { if (event.target.closest("[data-close]")) dismiss(); });
-    document.addEventListener("keydown", event => { if (event.key === "Escape" && !sheet.hidden) dismiss(); });
+    document.addEventListener("keydown", event => {
+      if (event.key !== "Escape") return;
+      if (!install.hidden) closeInstall();
+      else if (!sheet.hidden) dismiss();
+    });
     window.addEventListener("hashchange", route);
     load();
   </script>
