@@ -1,0 +1,16 @@
+{
+  "name": "Sengarcia Store",
+  "identifier": "com.sengarcia.noteplus.source",
+  "subtitle": "My apps for SideStore",
+  "description": "Apps uploaded by sengarcia32. Add this source in SideStore to install them and get updates.",
+  "developerName": "sengarcia32",
+  "iconURL": "icon.png",
+  "tintColor": "6366F1",
+  "apps": {
+    "com.sengarcia.noteplus": {
+      "subtitle": "AI notes, flashcards, quizzes and Ask AI",
+      "description": "Turn documents, recordings, YouTube videos and handwriting into study notes, flashcards and quizzes, and ask questions about any document.",
+      "category": "utilities"
+    }
+  }
+}

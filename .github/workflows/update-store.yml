@@ -1,0 +1,72 @@
+name: Update store
+
+# Runs when an IPA is published in a release, when IPAs are added to incoming/
+# (by the Note+ build, or "Add file › Upload files" on GitHub), and on demand.
+on:
+  release:
+    types: [published, edited, deleted]
+  push:
+    branches: [main]
+    paths:
+      - "incoming/**"
+      - "store-config.json"
+      - "scripts/**"
+      - ".github/workflows/update-store.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# One update at a time; later ones wait instead of being cancelled.
+concurrency:
+  group: update-store
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Turn IPAs in incoming/ into releases
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for ipa in incoming/*.ipa; do
+            IFS=$'\t' read -r bundle version build name < <(python3 scripts/ipa_tools.py "$ipa")
+            tag="${bundle}-${version}-${build}"
+            notes="${ipa%.ipa}.txt"
+            [ -f "$notes" ] || printf '%s %s\n' "$name" "$version" > "$notes"
+            if gh release view "$tag" > /dev/null 2>&1; then
+              gh release upload "$tag" "$ipa" --clobber
+            else
+              gh release create "$tag" "$ipa" --title "$name $version" --notes-file "$notes"
+            fi
+            echo "Released $name $version as $tag" >> "$GITHUB_STEP_SUMMARY"
+            git rm -q --ignore-unmatch "$ipa" "$notes"
+            rm -f "$ipa" "$notes"
+          done
+
+      - name: Rebuild source.json
+        run: python3 scripts/build_store.py | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Save changes
+        run: |
+          set -euo pipefail
+          git config user.name "Store update"
+          git config user.email "store-update@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes."
+            exit 0
+          fi
+          git commit -q -m "Update store"
+          for attempt in 1 2 3; do
+            git push -q origin HEAD:main && exit 0
+            git pull -q --rebase origin main
+          done
+          exit 1
