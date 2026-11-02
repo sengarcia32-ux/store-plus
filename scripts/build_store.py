@@ -15,7 +15,7 @@ import zipfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from ipa_tools import NotAnApp, inspect_ipa  # noqa: E402
 
-REPO = os.environ.get("GITHUB_REPOSITORY", "sengarcia32-ux/noteplus-updates")
+REPO = os.environ.get("GITHUB_REPOSITORY", "sengarcia32-ux/store-plus")
 OWNER = REPO.split("/")[0]
 TOKEN = os.environ.get("GH_TOKEN", "")
 RAW = f"https://raw.githubusercontent.com/{REPO}/main"

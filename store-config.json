@@ -1,11 +1,11 @@
 {
-  "name": "Sengarcia Store",
+  "name": "Store Plus",
   "identifier": "com.sengarcia.noteplus.source",
-  "subtitle": "My apps for SideStore",
-  "description": "Apps uploaded by sengarcia32. Add this source in SideStore to install them and get updates.",
+  "subtitle": "Apps for your iPhone and iPad",
+  "description": "Apps by sengarcia32, installed with SideStore using your own Apple ID. Website: https://sengarcia32-ux.github.io/store-plus/",
   "developerName": "sengarcia32",
-  "iconURL": "icon.png",
-  "tintColor": "6366F1",
+  "iconURL": "web/icon-512.png",
+  "tintColor": "4F46E5",
   "apps": {
     "com.sengarcia.noteplus": {
       "subtitle": "AI notes, flashcards, quizzes and Ask AI",

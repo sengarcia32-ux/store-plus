@@ -2,6 +2,7 @@ name: Update store
 
 # Runs when an IPA is published in a release, when IPAs are added to incoming/
 # (by the Note+ build, or "Add file › Upload files" on GitHub), and on demand.
+# Updates source.json for SideStore, then publishes the Store Plus website.
 on:
   release:
     types: [published, edited, deleted]
@@ -11,11 +12,14 @@ on:
       - "incoming/**"
       - "store-config.json"
       - "scripts/**"
+      - "web/**"
       - ".github/workflows/update-store.yml"
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 # One update at a time; later ones wait instead of being cancelled.
 concurrency:
@@ -29,6 +33,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
+      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v7
 
@@ -70,3 +75,29 @@ jobs:
             git pull -q --rebase origin main
           done
           exit 1
+
+      - name: Build website
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir _site
+          cp -R web/. _site/
+          cp source.json _site/source.json
+          cp -R icons _site/icons
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  website:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,9 +1,11 @@
-# Sengarcia Store
+# Store Plus
 
-My own app store for **SideStore**. Add this source in SideStore (Sources › **+**):
+My own app store for **SideStore**, with a website: **https://sengarcia32-ux.github.io/store-plus/**
+
+Add this source in SideStore (Sources › **+**):
 
 ```
-https://raw.githubusercontent.com/sengarcia32-ux/noteplus-updates/main/source.json
+https://raw.githubusercontent.com/sengarcia32-ux/store-plus/main/source.json
 ```
 
 Every app here shows up in SideStore, and new versions appear as **Update**.
@@ -24,10 +26,16 @@ Every app here shows up in SideStore, and new versions appear as **Update**.
 Open the `incoming` folder › **Add file** › **Upload files**, drop the `.ipa`, and commit.
 
 Either way, the *Update store* job reads the IPA (name, version, icon, permissions) and
-updates `source.json` within about two minutes. To remove an app version, delete its release.
+updates `source.json` and the website within about two minutes. To remove an app version, delete its release.
 
 New versions must have a higher version or build number than the one installed, or SideStore
 won't offer them as an update.
+
+## Website
+
+The website (`web/`) is published to GitHub Pages by the same job. It lists every app with its icon,
+version, What's New, permissions and version history, with *Get in SideStore* and *Download IPA*
+buttons. On iPhone or iPad, Safari's Share › Add to Home Screen keeps it on the Home Screen.
 
 ## Settings
 

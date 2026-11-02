@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Store Plus</title>
+  <meta name="description" content="Store Plus: iPhone and iPad apps you install with SideStore, using your own Apple ID.">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Store Plus">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #4f46e5;
+      --accent-text: #ffffff;
+      --accent-soft: rgba(79, 70, 229, 0.12);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.06);
+      --backdrop: rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --card: #1c1c1e;
+        --text: #f5f5f7;
+        --muted: #a1a1aa;
+        --line: #2c2c2e;
+        --accent: #818cf8;
+        --accent-text: #0b0b1a;
+        --accent-soft: rgba(129, 140, 248, 0.16);
+        --shadow: none;
+        --backdrop: rgba(0, 0, 0, 0.6);
+      }
+    }
+    * { box-sizing: border-box; }
+    html.locked, html.locked body { overflow: hidden; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: calc(20px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    }
+    a { color: var(--accent); }
+    h1, h2, h3 { margin: 0; line-height: 1.15; }
+
+    .hero { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 16px 0 24px; }
+    .hero img { width: 96px; height: 96px; border-radius: 22px; box-shadow: var(--shadow); }
+    .hero h1 { font-size: 34px; letter-spacing: -0.02em; }
+    .hero p { margin: 0; color: var(--muted); max-width: 480px; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 6px; }
+    .badge { font-size: 13px; color: var(--muted); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px; padding: 0 20px; border-radius: 999px; border: 0;
+      font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+      background: var(--accent-soft); color: var(--accent);
+    }
+    .btn.primary { background: var(--accent); color: var(--accent-text); }
+    .btn:active { transform: scale(0.98); }
+    .btn.small { min-height: 32px; padding: 0 16px; font-size: 15px; }
+
+    .section-title { font-size: 22px; margin: 24px 4px 12px; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+    .app-list { padding: 4px 0; }
+    .app-row {
+      display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center;
+      padding: 12px 16px; text-decoration: none; color: inherit;
+    }
+    .app-row + .app-row { border-top: 1px solid var(--line); }
+    .app-row img, .icon-placeholder { width: 64px; height: 64px; border-radius: 15px; background: var(--line); object-fit: cover; }
+    .app-row .name { font-weight: 600; font-size: 17px; }
+    .app-row .meta { color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .empty { padding: 24px 16px; color: var(--muted); text-align: center; margin: 0; }
+
+    .how { padding: 20px; }
+    .how ol { margin: 12px 0 0; padding-left: 22px; }
+    .how li { margin: 8px 0; }
+    .how .note { color: var(--muted); font-size: 14px; margin: 14px 0 0; }
+
+    footer { color: var(--muted); font-size: 13px; text-align: center; margin-top: 28px; line-height: 1.6; }
+
+    .sheet { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
+    .sheet[hidden] { display: none; }
+    .sheet-backdrop { position: absolute; inset: 0; background: var(--backdrop); }
+    .sheet-panel {
+      position: relative; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto;
+      background: var(--bg); border-radius: 24px 24px 0 0;
+      padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
+      animation: rise 0.22s ease-out;
+    }
+    @media (min-width: 700px) {
+      .sheet { align-items: center; }
+      .sheet-panel { border-radius: 24px; max-height: 86vh; }
+    }
+    @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .close {
+      position: sticky; top: 0; float: right; width: 32px; height: 32px; border-radius: 50%;
+      border: 0; background: var(--line); color: var(--text); font-size: 15px; cursor: pointer;
+    }
+    .detail-head { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; margin: 8px 0 18px; }
+    .detail-head img, .detail-head .icon-placeholder { width: 96px; height: 96px; border-radius: 22px; }
+    .detail-head h2 { font-size: 24px; }
+    .detail-head p { margin: 4px 0 10px; color: var(--muted); }
+    .detail-head .actions { justify-content: flex-start; margin: 0; }
+    .facts { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; padding: 12px 4px; margin-bottom: 14px; }
+    .facts div + div { border-left: 1px solid var(--line); }
+    .facts span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+    .facts strong { display: block; font-size: 15px; margin-top: 2px; overflow-wrap: anywhere; }
+    .block { padding: 16px; margin-bottom: 14px; }
+    .block h3 { font-size: 18px; margin-bottom: 8px; }
+    .block p { margin: 0; white-space: pre-line; }
+    .muted { color: var(--muted); }
+    .perm { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 10px 0; }
+    .perm + .perm { border-top: 1px solid var(--line); }
+    .perm strong { font-size: 15px; }
+    .perm span { color: var(--muted); font-size: 14px; }
+    .version { padding: 12px 0; }
+    .version + .version { border-top: 1px solid var(--line); }
+    .version-top { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .version p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+    #toast {
+      position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); z-index: 20;
+      transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+      background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px;
+      font-size: 15px; font-weight: 600; transition: opacity 0.2s, transform 0.2s;
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (prefers-reduced-motion: reduce) { .sheet-panel { animation: none; } #toast { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <img src="icon-192.png" alt="" width="96" height="96">
+      <h1 id="store-name">Store Plus</h1>
+      <p id="store-subtitle">Apps for your iPhone and iPad.</p>
+      <div class="actions">
+        <a class="btn primary" id="add-source">Add to SideStore</a>
+        <button class="btn" type="button" id="copy-source">Copy Store Link</button>
+      </div>
+      <span class="badge">Free · Installed with your own Apple ID</span>
+    </header>
+
+    <h2 class="section-title">Apps</h2>
+    <div class="card app-list" id="app-list">
+      <p class="empty">Loading apps…</p>
+    </div>
+
+    <h2 class="section-title">How to install</h2>
+    <section class="card how">
+      <ol>
+        <li><strong>Set up SideStore once.</strong> It needs a computer for the first install
+          (<a href="https://docs.sidestore.io/docs/installation/prerequisites" target="_blank" rel="noopener">SideStore guide</a>).</li>
+        <li><strong>Install LocalDevVPN</strong> from the App Store and tap <em>Connect</em>.
+          SideStore needs it on while installing or updating.</li>
+        <li><strong>Tap “Add to SideStore”</strong> above. Or copy the store link and add it in
+          SideStore › <em>Sources</em> › <em>+</em>.</li>
+        <li>Open <strong>Store Plus</strong> in SideStore and tap an app's <strong>FREE</strong> button.
+          New versions show up as <em>Update</em> in My Apps.</li>
+      </ol>
+      <p class="note">Every app is signed with your own Apple ID, not a shared certificate, so it isn't revoked.
+        With a free Apple ID you can keep 3 sideloaded apps at once, and SideStore renews them every 7 days.
+        Tip: in Safari, tap Share › <em>Add to Home Screen</em> to keep Store Plus on your Home Screen.</p>
+    </section>
+
+    <footer>
+      Store Plus is an independent store and isn't affiliated with Apple.<br>
+      iPhone and iPad are trademarks of Apple Inc.<br>
+      <a href="https://github.com/sengarcia32-ux/store-plus/releases/new" rel="noopener">Store owner: upload an app</a>
+    </footer>
+  </main>
+
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet-backdrop" data-close></div>
+    <article class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <button class="close" type="button" data-close aria-label="Close">✕</button>
+      <div id="sheet-body"></div>
+    </article>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const SOURCE_URL = "https://raw.githubusercontent.com/sengarcia32-ux/store-plus/main/source.json";
+    const SIDESTORE_LINK = "sidestore://source?url=" + encodeURIComponent(SOURCE_URL);
+    const PERMISSION_NAMES = {
+      NSCameraUsageDescription: "Camera",
+      NSMicrophoneUsageDescription: "Microphone",
+      NSSpeechRecognitionUsageDescription: "Speech Recognition",
+      NSPhotoLibraryUsageDescription: "Photos",
+      NSPhotoLibraryAddUsageDescription: "Save to Photos",
+      NSLocationWhenInUseUsageDescription: "Location",
+      NSLocationAlwaysAndWhenInUseUsageDescription: "Location (Always)",
+      NSContactsUsageDescription: "Contacts",
+      NSCalendarsUsageDescription: "Calendars",
+      NSRemindersUsageDescription: "Reminders",
+      NSBluetoothAlwaysUsageDescription: "Bluetooth",
+      NSFaceIDUsageDescription: "Face ID",
+      NSMotionUsageDescription: "Motion & Fitness",
+      NSHealthShareUsageDescription: "Health",
+      NSLocalNetworkUsageDescription: "Local Network",
+      NSAppleMusicUsageDescription: "Media & Apple Music",
+    };
+
+    const list = document.getElementById("app-list");
+    const sheet = document.getElementById("sheet");
+    const sheetBody = document.getElementById("sheet-body");
+    const toast = document.getElementById("toast");
+    let store = null;
+
+    function el(tag, attrs = {}, ...children) {
+      const node = document.createElement(tag);
+      for (const [key, value] of Object.entries(attrs)) {
+        if (value == null) continue;
+        if (key === "class") node.className = value;
+        else if (key === "text") node.textContent = value;
+        else if (key.startsWith("on")) node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value);
+      }
+      for (const child of children.flat()) {
+        if (child == null || child === false) continue;
+        node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+      }
+      return node;
+    }
+
+    // Only ever link to https addresses taken from the store file.
+    function safeURL(url) {
+      return typeof url === "string" && url.startsWith("https://") ? url : null;
+    }
+
+    function icon(app, size) {
+      const src = safeURL(app.iconURL);
+      return src
+        ? el("img", { src, alt: "", width: size, height: size, loading: "lazy" })
+        : el("div", { class: "icon-placeholder", "aria-hidden": "true" });
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return "—";
+      const mb = bytes / 1048576;
+      return mb >= 100 ? `${Math.round(mb)} MB` : `${mb.toFixed(1)} MB`;
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      return isNaN(date) ? "" : date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    async function copySourceLink() {
+      try {
+        await navigator.clipboard.writeText(SOURCE_URL);
+      } catch {
+        const field = el("textarea", { readonly: "" });
+        field.value = SOURCE_URL;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.append(field);
+        field.select();
+        document.execCommand("copy");
+        field.remove();
+      }
+      showToast("Store link copied");
+    }
+
+    function appLink(app) {
+      return "#app/" + encodeURIComponent(app.bundleIdentifier);
+    }
+
+    function renderList() {
+      const apps = store.apps || [];
+      if (!apps.length) {
+        list.replaceChildren(el("p", { class: "empty", text: "No apps yet." }));
+        return;
+      }
+      list.replaceChildren(...apps.map(app => {
+        const latest = (app.versions || [])[0] || {};
+        return el("a", { class: "app-row", href: appLink(app) },
+          icon(app, 64),
+          el("div", {},
+            el("div", { class: "name", text: app.name }),
+            el("div", { class: "meta", text: app.subtitle || app.developerName || "" }),
+            el("div", { class: "meta", text: [latest.version && `Version ${latest.version}`, formatSize(latest.size)].filter(Boolean).join(" · ") })
+          ),
+          el("span", { class: "btn small" }, "GET")
+        );
+      }));
+    }
+
+    function renderDetail(app) {
+      const versions = app.versions || [];
+      const latest = versions[0] || {};
+      const download = safeURL(latest.downloadURL);
+      const privacy = Object.entries((app.appPermissions || {}).privacy || {});
+      const entitlements = (app.appPermissions || {}).entitlements || [];
+
+      sheetBody.replaceChildren(
+        el("div", { class: "detail-head" },
+          icon(app, 96),
+          el("div", {},
+            el("h2", { id: "sheet-title", text: app.name }),
+            el("p", { text: app.subtitle || app.developerName || "" }),
+            el("div", { class: "actions" },
+              el("a", { class: "btn primary small", href: SIDESTORE_LINK }, "Get in SideStore"),
+              download && el("a", { class: "btn small", href: download, download: "" }, "Download IPA")
+            )
+          )
+        ),
+        el("div", { class: "card facts" },
+          el("div", {}, el("span", { text: "Version" }), el("strong", { text: latest.version || "—" })),
+          el("div", {}, el("span", { text: "Size" }), el("strong", { text: formatSize(latest.size) })),
+          el("div", {}, el("span", { text: "Requires" }), el("strong", { text: latest.minOSVersion ? `iOS ${latest.minOSVersion}+` : "—" })),
+          el("div", {}, el("span", { text: "Updated" }), el("strong", { text: formatDate(latest.date) || "—" }))
+        ),
+        latest.localizedDescription && el("section", { class: "card block" },
+          el("h3", { text: "What's New" }),
+          el("p", { text: latest.localizedDescription })
+        ),
+        app.localizedDescription && el("section", { class: "card block" },
+          el("h3", { text: "About" }),
+          el("p", { text: app.localizedDescription }),
+          el("p", { class: "muted", text: `By ${app.developerName || "unknown"}` })
+        ),
+        el("section", { class: "card block" },
+          el("h3", { text: "Permissions" }),
+          privacy.length || entitlements.length
+            ? [
+                ...privacy.map(([key, reason]) => el("div", { class: "perm" },
+                  el("strong", { text: PERMISSION_NAMES[key] || key.replace(/^NS|UsageDescription$/g, "") }),
+                  el("span", { text: reason })
+                )),
+                ...entitlements.map(name => el("div", { class: "perm" },
+                  el("strong", { text: "Capability" }),
+                  el("span", { text: name })
+                )),
+              ]
+            : el("p", { class: "muted", text: "This app doesn't ask for any special permissions." })
+        ),
+        versions.length > 1 && el("section", { class: "card block" },
+          el("h3", { text: "Version History" }),
+          ...versions.map(version => el("div", { class: "version" },
+            el("div", { class: "version-top" },
+              el("strong", { text: `Version ${version.version}` }),
+              el("span", { class: "muted", text: formatDate(version.date) })
+            ),
+            version.localizedDescription && el("p", { text: version.localizedDescription }),
+            safeURL(version.downloadURL) && el("a", { href: safeURL(version.downloadURL), download: "" }, `Download ${formatSize(version.size)}`)
+          ))
+        )
+      );
+    }
+
+    function openSheet() {
+      sheet.hidden = false;
+      document.documentElement.classList.add("locked");
+      sheet.querySelector(".close").focus({ preventScroll: true });
+    }
+
+    function closeSheet() {
+      sheet.hidden = true;
+      document.documentElement.classList.remove("locked");
+    }
+
+    function route() {
+      const match = location.hash.match(/^#app\/(.+)$/);
+      if (!match || !store) return closeSheet();
+      const id = decodeURIComponent(match[1]);
+      const app = (store.apps || []).find(a => a.bundleIdentifier === id);
+      if (!app) return closeSheet();
+      renderDetail(app);
+      openSheet();
+    }
+
+    function dismiss() {
+      if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+      closeSheet();
+    }
+
+    async function load() {
+      try {
+        const response = await fetch("source.json", { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        store = await response.json();
+        if (store.name) {
+          document.getElementById("store-name").textContent = store.name;
+          document.title = store.name;
+        }
+        if (store.subtitle) document.getElementById("store-subtitle").textContent = store.subtitle;
+        renderList();
+        route();
+      } catch (error) {
+        list.replaceChildren(el("p", { class: "empty", text: "Couldn't load the store. Check your connection and refresh the page." }));
+      }
+    }
+
+    document.getElementById("add-source").href = SIDESTORE_LINK;
+    document.getElementById("copy-source").addEventListener("click", copySourceLink);
+    sheet.addEventListener("click", event => { if (event.target.closest("[data-close]")) dismiss(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && !sheet.hidden) dismiss(); });
+    window.addEventListener("hashchange", route);
+    load();
+  </script>
+</body>
+</html>
