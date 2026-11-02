@@ -1,0 +1,45 @@
+{
+  "name": "Note+ Updates",
+  "identifier": "com.sengarcia.noteplus.source",
+  "subtitle": "AI study notes for iPhone and iPad",
+  "description": "Updates for Note+, installed with SideStore.",
+  "iconURL": "https://raw.githubusercontent.com/sengarcia32-ux/noteplus-updates/main/icon.png",
+  "tintColor": "6366F1",
+  "nsfw": false,
+  "featuredApps": [
+    "com.sengarcia.noteplus"
+  ],
+  "apps": [
+    {
+      "name": "Note+",
+      "bundleIdentifier": "com.sengarcia.noteplus",
+      "developerName": "sengarcia32",
+      "subtitle": "AI notes, flashcards, quizzes and Ask AI",
+      "localizedDescription": "Turn documents, recordings, YouTube videos and handwriting into study notes, flashcards and quizzes, and ask questions about any document.",
+      "iconURL": "https://raw.githubusercontent.com/sengarcia32-ux/noteplus-updates/main/icon.png",
+      "tintColor": "6366F1",
+      "category": "education",
+      "screenshots": [],
+      "versions": [
+        {
+          "version": "1.1.7",
+          "buildVersion": "7",
+          "date": "2026-11-02T12:06:54Z",
+          "localizedDescription": "Publish online updates for SideStore; add backup and restore",
+          "downloadURL": "https://raw.githubusercontent.com/sengarcia32-ux/noteplus-updates/main/NotePlus-1.1.7.ipa",
+          "size": 944318,
+          "minOSVersion": "26.0"
+        }
+      ],
+      "appPermissions": {
+        "entitlements": [],
+        "privacy": {
+          "NSCameraUsageDescription": "Note+ uses the camera to scan documents and handwritten pages into notes.",
+          "NSMicrophoneUsageDescription": "Note+ records lectures and voice notes so it can transcribe them into study notes.",
+          "NSSpeechRecognitionUsageDescription": "Note+ transcribes your recordings into text so it can create notes, flashcards, and quizzes."
+        }
+      }
+    }
+  ],
+  "news": []
+}
